@@ -4,20 +4,21 @@ FROM node:18-alpine AS base
 
 WORKDIR /app
 
-COPY [ "package.json", "yarn.lock*", "./" ]
+COPY [ "package.json", "pnpm-lock*", "./" ]
 
 FROM base AS dev
 ENV NODE_ENV=development
-RUN yarn install --frozen-lockfile
+RUN npm install -g pnpm
+RUN pnpm install
 COPY . .
-CMD [ "yarn", "start:dev" ]
+CMD [ "pnpm", "start:dev" ]
 
 FROM dev AS test
 ENV NODE_ENV=test
-CMD [ "yarn", "test" ]
+CMD [ "pnpm", "test" ]
 
 FROM test AS test-cov
-CMD [ "yarn", "test:cov" ]
+CMD [ "pnpm", "test:cov" ]
 
 FROM test AS test-watch
 ENV GIT_WORK_TREE=/app GIT_DIR=/app/.git
@@ -26,8 +27,8 @@ CMD [ "yarn", "test:watch" ]
 
 FROM base AS prod
 ENV NODE_ENV=production
-RUN yarn install --frozen-lockfile --production
+RUN pnpm install --production
 COPY . .
-RUN yarn global add @nestjs/cli
-RUN yarn build
-CMD [ "yarn", "start:prod" ]
+RUN pnpm install @nestjs/cli
+RUN pnpm build
+CMD [ "pnpm", "start:prod" ]

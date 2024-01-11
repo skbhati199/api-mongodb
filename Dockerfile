@@ -4,21 +4,20 @@ FROM node:18-alpine AS base
 
 WORKDIR /app
 
-COPY [ "package.json", "pnpm-lock*", "./" ]
+COPY [ "package.json", "./" ]
 
 FROM base AS dev
 ENV NODE_ENV=development
-RUN npm install -g pnpm
-RUN pnpm install
+RUN npm install
 COPY . .
-CMD [ "pnpm", "start:dev" ]
+CMD [ "npm", "start:dev" ]
 
 FROM dev AS test
 ENV NODE_ENV=test
-CMD [ "pnpm", "test" ]
+CMD [ "npm", "run", "test" ]
 
 FROM test AS test-cov
-CMD [ "pnpm", "test:cov" ]
+CMD [ "npm", "run", "test:cov" ]
 
 FROM test AS test-watch
 ENV GIT_WORK_TREE=/app GIT_DIR=/app/.git
@@ -27,8 +26,8 @@ CMD [ "yarn", "test:watch" ]
 
 FROM base AS prod
 ENV NODE_ENV=production
-RUN pnpm install --production
+RUN npm install --production
 COPY . .
-RUN pnpm install @nestjs/cli
-RUN pnpm build
-CMD [ "pnpm", "start:prod" ]
+RUN npm install -g @nestjs/cli
+RUN npm run build
+CMD [ "npm", "start:prod" ]
